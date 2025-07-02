@@ -1,83 +1,75 @@
-const chatForm = document.getElementById("chatForm");
-const userInput = document.getElementById("userInput");
-const chatBox = document.getElementById("chatBox");
+const chatForm = document.getElementById('chat-form');
+const chatBox = document.getElementById('chat-box');
+const userInput = document.getElementById('user-input');
 
-chatForm.addEventListener("submit", function (e) {
+chatForm.addEventListener('submit', function (e) {
   e.preventDefault();
   const message = userInput.value.trim();
-  if (!message) return;
+  if (message === '') return;
 
-  appendMessage("user", message);
-  userInput.value = "";
+  appendMessage('user', message);
+  userInput.value = '';
 
-  if (message.toLowerCase().includes("search")) {
-    simulateTyping("Searching online...", () => getWebSearchResults(message));
-  } else {
-    simulateTyping("Let me think...", () => generateFountainReply(message));
-  }
+  setTimeout(() => {
+    const reply = generateBotReply(message);
+    appendMessage('bot', reply);
+  }, 1000);
 });
 
-function appendMessage(sender, text, isHTML = false) {
-  const msg = document.createElement("div");
-  msg.classList.add(sender === "user" ? "user-message" : "bot-message");
-  if (isHTML) msg.innerHTML = text;
-  else msg.textContent = text;
-  chatBox.appendChild(msg);
+function appendMessage(sender, text) {
+  const msgDiv = document.createElement('div');
+  msgDiv.classList.add('message', sender);
+  msgDiv.innerText = text;
+  chatBox.appendChild(msgDiv);
   chatBox.scrollTop = chatBox.scrollHeight;
 }
 
-function simulateTyping(placeholder, callback) {
-  const typingBubble = document.createElement("div");
-  typingBubble.classList.add("bot-message");
-  typingBubble.textContent = "";
-  chatBox.appendChild(typingBubble);
+function generateBotReply(message) {
+  const lower = message.toLowerCase();
 
-  let i = 0;
-  const interval = setInterval(() => {
-    if (i < placeholder.length) {
-      typingBubble.textContent += placeholder[i];
-      i++;
-      chatBox.scrollTop = chatBox.scrollHeight;
-    } else {
-      clearInterval(interval);
-      typingBubble.remove();
-      callback();
-    }
-  }, 30);
-}
-
-function generateFountainReply(userText) {
-  let reply = "Hmm, I don't quite know how to respond.";
-
-  const text = userText.toLowerCase();
-  if (text.includes("hello") || text.includes("hi")) reply = "Hey there! I'm Fountain 😊";
-  else if (text.includes("name")) reply = "I'm Fountain, your smart assistant.";
-  else if (text.includes("how are you")) reply = "I'm fantastic and ready to help you!";
-  else if (text.includes("thank")) reply = "You're most welcome!";
-  else reply = "Try saying 'search ...' and I’ll look it up online for you.";
-
-  appendMessage("bot", reply);
-}
-
-async function getWebSearchResults(query) {
-  try {
-    const res = await fetch("http://localhost:3000/search", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ query })
-    });
-
-    const data = await res.json();
-    if (!data.results || data.results.length === 0) {
-      appendMessage("bot", "Sorry, I couldn’t find anything relevant.");
-      return;
-    }
-
-    const top = data.results.slice(0, 3).map(item =>
-      `🔹 <a href="${item.url}" target="_blank">${item.title}</a><br>${item.snippet}`
-    ).join("<br><br>");
-
-    appendMessage("bot", top, true);
-  } catch (err) {
-    appendMessage("bot", "Something went wrong while searching.");
+  if (lower.includes("hello") || lower.includes("hi")) {
+    return "Hello! I'm Fountain AI. How can I assist you today?";
   }
+
+  if (lower.includes("who are you") || lower.includes("what is your name")) {
+    return "I'm Fountain AI, your animated smart assistant.";
+  }
+
+  if (lower.includes("weather")) {
+    return "I can't check real-time weather yet, but I recommend checking Google Weather or installing a weather app!";
+  }
+
+  if (lower.includes("news")) {
+    return "Currently, I can't fetch live news. Would you like me to be connected to the internet for real-time updates?";
+  }
+
+  if (lower.includes("how are you")) {
+    return "I'm always great! I'm made of pure code and coffee ☕.";
+  }
+
+  if (lower.includes("help") || lower.includes("what can you do")) {
+    return "I can chat, provide information, simulate AI responses, and even be upgraded to use real-time APIs!";
+  }
+
+  if (lower.includes("life advice")) {
+    return "Life is a journey—stay curious, stay learning, and treat people kindly.";
+  }
+
+  if (lower.includes("joke")) {
+    return "Why did the computer catch a cold? Because it left its Windows open!";
+  }
+
+  if (lower.includes("programming")) {
+    return "Programming is like magic—only the spells are written in Python, JavaScript, or C++.";
+  }
+
+  if (lower.includes("love")) {
+    return "Love is a beautiful part of life. Cherish it when you find it 💖.";
+  }
+
+  if (lower.includes("god")) {
+    return "Many believe in a higher power—it's a personal journey. Do you have questions about faith?";
+  }
+
+  return "Hmm... I don't have a perfect answer to that yet, but I'm learning more every day! Want to ask something else?";
+}
